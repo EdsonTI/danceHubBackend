@@ -1,9 +1,12 @@
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
-from app.core.security import get_password_hash, verify_password
+from app.core.security import create_access_token, get_password_hash, verify_password
 from app.models.global_entities import User
+from app.models.tenant_entities import RoleAssignment
+from app.schemas.identity import TokenResponse
 
 
 def register_user(
@@ -45,3 +48,32 @@ def authenticate_user(
 		return None
 
 	return user
+
+
+def switch_context(
+	db: Session,
+	user: User,
+	school_id: int,
+) -> TokenResponse:
+	assignment = db.scalar(
+		select(RoleAssignment)
+		.options(joinedload(RoleAssignment.role))
+		.where(
+			RoleAssignment.user_id == user.id,
+			RoleAssignment.school_id == school_id,
+		)
+	)
+	if assignment is None or not assignment.is_active:
+		raise HTTPException(
+			status_code=status.HTTP_403_FORBIDDEN,
+			detail="Acceso denegado a esta escuela",
+		)
+
+	access_token = create_access_token(
+		{
+			"sub": str(user.id),
+			"active_school_id": school_id,
+			"active_role": assignment.role.name,
+		}
+	)
+	return TokenResponse(access_token=access_token)

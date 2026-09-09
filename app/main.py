@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.tenant.auth import router as auth_router
+from app.api.tenant.classes import router as classes_router
 from app.api.tenant.schools import router as schools_router
+from app.api.tenant.users import router as users_router
 from app.core.config import settings
 
 def create_app() -> FastAPI:
@@ -24,7 +26,9 @@ def create_app() -> FastAPI:
         return {"status": "ok", "service": settings.PROJECT_NAME}
 
     app.include_router(auth_router, prefix="/api/tenant/auth")
-    app.include_router(schools_router, prefix="/api/tenant/schools", tags=["Schools"])
+    app.include_router(classes_router, prefix="/api/tenant/classes")
+    app.include_router(schools_router, prefix="/api/tenant/schools")
+    app.include_router(users_router, prefix="/api/tenant/users")
     
     return app
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db
+from app.api.dependencies import get_current_user, get_db
 from app.core.security import create_access_token
 from app.schemas.identity import (
 	TokenResponse,
@@ -9,6 +9,8 @@ from app.schemas.identity import (
 	UserLogin,
 	UserResponse,
 )
+from app.schemas.user import SwitchContextRequest
+from app.models.global_entities import User
 from app.services import auth_service
 
 
@@ -55,3 +57,12 @@ def login(
 
 	access_token = create_access_token({"sub": str(user.id)})
 	return TokenResponse(access_token=access_token)
+
+
+@router.post("/switch", response_model=TokenResponse)
+def switch_context(
+	request: SwitchContextRequest,
+	db: Session = Depends(get_db),
+	current_user: User = Depends(get_current_user),
+) -> TokenResponse:
+	return auth_service.switch_context(db, current_user, request.school_id)
