@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import RequireRole, get_current_user, get_db
 from app.models.global_entities import User
 from app.schemas.tenant import SchoolCreate, SchoolResponse
 from app.services import school_service
@@ -19,6 +19,7 @@ def create_school(
 	school_in: SchoolCreate,
 	db: Session = Depends(get_db),
 	current_user: User = Depends(get_current_user),
+	_role_context: int = Depends(RequireRole(["SUPERADMIN", "SCHOOL_ADMIN"])),
 ) -> SchoolResponse:
 	try:
 		return school_service.create_school(

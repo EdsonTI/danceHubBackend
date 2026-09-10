@@ -26,7 +26,7 @@ def create_app() -> FastAPI:
         return {"status": "ok", "service": settings.PROJECT_NAME}
 
     app.include_router(auth_router, prefix="/api/tenant/auth")
-    app.include_router(classes_router, prefix="/api/tenant/classes")
+    app.include_router(classes_router, prefix="/api/tenant/classes", tags=["Classes"])
     app.include_router(schools_router, prefix="/api/tenant/schools")
     app.include_router(users_router, prefix="/api/tenant/users")
     
