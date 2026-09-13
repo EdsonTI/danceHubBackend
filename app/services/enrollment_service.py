@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.global_entities import Role
 from app.models.local_entities import ClassEnrollment, DanceClass
@@ -79,3 +79,29 @@ def enroll_user(
 
 	db.refresh(enrollment)
 	return enrollment
+
+
+def get_class_students(
+	db: Session,
+	class_id: int,
+	school_id: int,
+) -> list[ClassEnrollment]:
+	dance_class = db.scalar(
+		select(DanceClass).where(
+			DanceClass.id == class_id,
+			DanceClass.school_id == school_id,
+		)
+	)
+	if dance_class is None:
+		raise HTTPException(
+			status_code=status.HTTP_404_NOT_FOUND,
+			detail="Clase no encontrada o no pertenece a tu escuela",
+		)
+
+	return list(
+		db.scalars(
+			select(ClassEnrollment)
+			.options(joinedload(ClassEnrollment.user))
+			.where(ClassEnrollment.dance_class_id == class_id)
+		).all()
+	)

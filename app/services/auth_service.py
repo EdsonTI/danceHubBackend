@@ -72,6 +72,7 @@ def switch_context(
 	access_token = create_access_token(
 		{
 			"sub": str(user.id),
+			"is_superadmin": user.is_superadmin,
 			"active_school_id": school_id,
 			"active_role": assignment.role.name,
 		}

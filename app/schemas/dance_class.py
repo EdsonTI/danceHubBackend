@@ -27,3 +27,20 @@ class ClassEnrollmentResponse(BaseModel):
 	status: str
 
 	model_config = ConfigDict(from_attributes=True)
+
+
+class StudentInfo(BaseModel):
+	id: int
+	email: str
+	first_name: str
+	last_name: str
+
+	model_config = ConfigDict(from_attributes=True)
+
+
+class EnrollmentWithStudentResponse(BaseModel):
+	id: int
+	status: str
+	user: StudentInfo
+
+	model_config = ConfigDict(from_attributes=True)

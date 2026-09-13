@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -17,3 +19,12 @@ class SchoolResponse(SchoolBase):
 	is_active: bool
 
 	model_config = ConfigDict(from_attributes=True)
+
+
+class SchoolStatusUpdate(BaseModel):
+	status: Literal["ACTIVE", "PENDING", "REJECTED"]
+
+
+class AssignRoleRequest(BaseModel):
+	user_id: int
+	role_name: str = "SCHOOL_ADMIN"

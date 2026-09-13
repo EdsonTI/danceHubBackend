@@ -55,7 +55,9 @@ def login(
 			headers={"WWW-Authenticate": "Bearer"},
 		)
 
-	access_token = create_access_token({"sub": str(user.id)})
+	access_token = create_access_token(
+		{"sub": str(user.id), "is_superadmin": user.is_superadmin}
+	)
 	return TokenResponse(access_token=access_token)
 
 

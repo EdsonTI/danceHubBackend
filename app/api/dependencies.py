@@ -91,3 +91,37 @@ class RequireRole:
 				status_code=status.HTTP_401_UNAUTHORIZED,
 				detail="Debes seleccionar una escuela primero",
 			) from None
+
+
+class RequireSuperAdmin:
+	def __call__(
+		self,
+		credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+	) -> int:
+		try:
+			payload = jwt.decode(
+				credentials.credentials,
+				settings.SECRET_KEY,
+				algorithms=[settings.ALGORITHM],
+			)
+		except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+			raise HTTPException(
+				status_code=status.HTTP_401_UNAUTHORIZED,
+				detail="Could not validate credentials",
+				headers={"WWW-Authenticate": "Bearer"},
+			) from None
+
+		if payload.get("is_superadmin") is not True:
+			raise HTTPException(
+				status_code=status.HTTP_403_FORBIDDEN,
+				detail="Acceso denegado: Se requieren permisos de SuperAdmin",
+			)
+
+		try:
+			return int(payload.get("sub"))
+		except (TypeError, ValueError):
+			raise HTTPException(
+				status_code=status.HTTP_401_UNAUTHORIZED,
+				detail="Could not validate credentials",
+				headers={"WWW-Authenticate": "Bearer"},
+			) from None

@@ -7,6 +7,7 @@ from app.schemas.dance_class import (
 	ClassEnrollmentResponse,
 	DanceClassCreate,
 	DanceClassResponse,
+	EnrollmentWithStudentResponse,
 )
 from app.services import dance_class_service, enrollment_service
 
@@ -21,6 +22,15 @@ def create_class(
 	school_id: int = Depends(RequireRole(["SCHOOL_ADMIN"])),
 ) -> DanceClassResponse:
 	return dance_class_service.create_dance_class(db, class_in, school_id)
+
+
+@router.get("/{class_id}/students", response_model=list[EnrollmentWithStudentResponse])
+def get_class_students(
+	class_id: int,
+	db: Session = Depends(get_db),
+	school_id: int = Depends(RequireRole(["SCHOOL_ADMIN", "TEACHER"])),
+) -> list[EnrollmentWithStudentResponse]:
+	return enrollment_service.get_class_students(db, class_id, school_id)
 
 
 @router.post(

@@ -13,6 +13,7 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(100))
     last_name: Mapped[str] = mapped_column(String(100))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_superadmin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
 
     # Relación: Un humano puede tener múltiples perfiles (ej. Profesor y Alumno)
     profiles: Mapped[list["UserProfile"]] = relationship(back_populates="user", cascade="all, delete-orphan")
